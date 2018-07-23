@@ -54,6 +54,7 @@ dependencies {
     compile("org.jetbrains.kotlin:kotlin-reflect")
     runtime('org.springframework.boot:spring-boot-devtools')
     runtime('com.h2database:h2')
+    runtime('org.postgresql:postgresql')
     testCompile('org.springframework.boot:spring-boot-starter-test')
 
 
