@@ -1,0 +1,37 @@
+package com.cotel.isworthwatching.movies.actions
+
+import com.cotel.isworthwatching.base.Responder
+import com.cotel.isworthwatching.base.defaultNotFoundResponder
+import com.cotel.isworthwatching.base.entityResponder
+import com.cotel.isworthwatching.movies.MoviesRepository
+import com.cotel.isworthwatching.movies.command.UpdateMovie
+import com.cotel.isworthwatching.movies.command.VoteCommand
+import com.cotel.isworthwatching.movies.command.VoteType
+import com.cotel.isworthwatching.movies.command.VoteUseCase
+import com.cotel.isworthwatching.movies.models.Movie
+import com.cotel.isworthwatching.movies.queries.GetMovie
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+
+@RestController
+@RequestMapping("/movies")
+class NegativeVoteAction(private val moviesRepository: MoviesRepository) :
+    Responder<Movie> by entityResponder() {
+  @PutMapping("/{id}/negativeVote")
+  fun invoke(@PathVariable("id") id: String) {
+    return object : VoteUseCase {
+      override val voteType: VoteType = VoteType.NegativeVote
+      override val getMovie: GetMovie = getMovieDependency(moviesRepository)
+      override val positiveVote: UpdateMovie = updateMovieDependency(moviesRepository)
+    }.run {
+      val result = VoteCommand(id).runUseCase().unsafeRunSync()
+
+      result.fold(
+          { defaultNotFoundResponder(Movie::class.java, id) },
+          { it.respond() }
+      )
+    }
+  }
+}
