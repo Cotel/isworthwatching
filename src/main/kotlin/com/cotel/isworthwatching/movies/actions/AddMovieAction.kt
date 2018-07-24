@@ -14,6 +14,7 @@ import com.cotel.isworthwatching.movies.models.Movie
 import com.cotel.isworthwatching.movies.models.MovieEntity
 import com.cotel.isworthwatching.movies.MoviesRepository
 import com.cotel.isworthwatching.movies.command.IsMovieRepeated
+import com.cotel.isworthwatching.movies.models.MovieResponse
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -49,7 +50,9 @@ class AddMovieAction(private val repository: MoviesRepository) {
             mapOf("error" to "A Movie with name ${addMovieRequest.name} already exists").respond()
           } },
           {
-            creationSuccessResponder<Movie>().run { it.respond() }
+            with (MovieResponse.domainMapper) {
+              creationSuccessResponder<MovieResponse>().run { it.reverseGet().respond() }
+            }
           }
       )
     }

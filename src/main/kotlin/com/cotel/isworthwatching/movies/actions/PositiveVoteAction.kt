@@ -10,6 +10,7 @@ import com.cotel.isworthwatching.movies.command.VoteCommand
 import com.cotel.isworthwatching.movies.command.VoteType
 import com.cotel.isworthwatching.movies.command.VoteUseCase
 import com.cotel.isworthwatching.movies.models.Movie
+import com.cotel.isworthwatching.movies.models.MovieResponse
 import com.cotel.isworthwatching.movies.queries.GetMovie
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PathVariable
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/movies")
 class PositiveVoteAction(private val moviesRepository: MoviesRepository) :
-    Responder<Movie> by entityResponder() {
+    Responder<MovieResponse> by entityResponder() {
   @PutMapping("/{id}/positiveVote")
   fun invoke(@PathVariable("id") id: String): ResponseEntity<*> {
     return object : VoteUseCase {
@@ -32,7 +33,7 @@ class PositiveVoteAction(private val moviesRepository: MoviesRepository) :
 
       result.fold(
           { defaultNotFoundResponder(Movie::class.java, id) },
-          { it.respond() }
+          { MovieResponse.domainMapper.run { it.reverseGet().respond() } }
       )
     }
   }

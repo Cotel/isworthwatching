@@ -10,6 +10,7 @@ import com.cotel.isworthwatching.movies.queries.GetAllMoviesUseCase
 import com.cotel.isworthwatching.movies.models.Movie
 import com.cotel.isworthwatching.movies.models.MovieEntity
 import com.cotel.isworthwatching.movies.MoviesRepository
+import com.cotel.isworthwatching.movies.models.MovieResponse
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -21,11 +22,11 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/movies")
 class GetAllMoviesAction(private val repository: MoviesRepository) :
     EntityMapper<MovieEntity, Movie> by MovieEntity.domainMapper,
-    Responder<List<Movie>> by listResponder() {
+    Responder<List<MovieResponse>> by listResponder() {
 
   @GetMapping
   fun invoke(@RequestParam("page") page: Int,
-             @RequestParam("page_size") pageSize: Int): ResponseEntity<List<Movie>> {
+             @RequestParam("page_size") pageSize: Int): ResponseEntity<List<MovieResponse>> {
     return object : GetAllMoviesUseCase {
       override val query: GetAllMovies = { page, pageSize ->
         IO { repository.findAll(PageRequest.of(page, pageSize)) }
@@ -34,7 +35,7 @@ class GetAllMoviesAction(private val repository: MoviesRepository) :
     }.run {
       val movies = GetAllMoviesQuery(page, pageSize).runUseCase().unsafeRunSync()
 
-      movies.respond()
+      MovieResponse.domainMapper.run { movies.map { it.reverseGet() }.respond() }
     }
   }
 }

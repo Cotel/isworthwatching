@@ -13,6 +13,7 @@ import com.cotel.isworthwatching.movies.queries.GetMovieUseCase
 import com.cotel.isworthwatching.movies.models.Movie
 import com.cotel.isworthwatching.movies.models.MovieEntity
 import com.cotel.isworthwatching.movies.MoviesRepository
+import com.cotel.isworthwatching.movies.models.MovieResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -23,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/movies")
 class GetMovieDetailsAction(private val repository: MoviesRepository) :
     EntityMapper<MovieEntity, Movie> by MovieEntity.domainMapper,
-    Responder<Movie> by entityResponder() {
+    Responder<MovieResponse> by entityResponder() {
 
   @GetMapping("/{id}")
   fun invoke(@PathVariable("id") id: String): ResponseEntity<*> {
@@ -39,7 +40,7 @@ class GetMovieDetailsAction(private val repository: MoviesRepository) :
 
       result.fold(
           { defaultNotFoundResponder(Movie::class.java, id) },
-          { it.respond() }
+          { MovieResponse.domainMapper.run { it.reverseGet().respond() } }
       )
 
     }
